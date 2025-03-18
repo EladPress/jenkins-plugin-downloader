@@ -2,39 +2,40 @@ import requests
 from bs4 import BeautifulSoup
 import os
 from tqdm import tqdm
-import time
 
-url = "https://updates.jenkins.io/download/plugins/"
-response = requests.get(url)
+# else:
+#     print("Failed to retrieve the page")
 
-# Check if request was successful
-if response.status_code == 200:
-    soup = BeautifulSoup(response.text, "html.parser")
-
-    # Example: Find all links
-    links = [a['href'] for a in soup.find_all('a', href=True)[4:]]
-    links = [os.path.join(url, link) for link in links]
-    for link in links:
-        print(link)
-else:
-    print("Failed to retrieve the page")
+def get_plugins_list():
+    url = "https://updates.jenkins.io/download/plugins/"
+    print('Retrieving plugins list:')
+    response = requests.get(url)
+    if response.status_code == 200:
+        soup = BeautifulSoup(response.text, "html.parser")
+        links = [a['href'] for a in soup.find_all('a', href=True)[4:]]
+        links = [os.path.join(url, link) for link in links]
+        for link in links:
+            print(link)
+        return links
 
 def get_latest_plugins_links(initial_links):
+    print('retrieving all latest plugin links(shortened for now)')
     latest_links = []
-    for plugin_url in initial_links:
-        print('here1')
+    for index, plugin_url in enumerate(tqdm(initial_links[:20], desc="Processing")):
+
         response = requests.get(plugin_url)
-        print('here2')
+
         new_soup = BeautifulSoup(response.text, "html.parser")
         current_links = [a['href'] for a in new_soup.find_all('a', href=True)]
-        
-        # print(current_links[0])
+        # print(f"Processing {index + 1}/{len(initial_links)}: {plugin_url}")
         latest_links.append(os.path.join(plugin_url, current_links[0]))
     for link in latest_links:
         print(link)
         # for link in current_links:
         #     print(link)
         # return current_links
+
+links = get_plugins_list()
 get_latest_plugins_links(links)
 # def download_latest_plugins():
     

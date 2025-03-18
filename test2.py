@@ -4,8 +4,6 @@ import os
 from tqdm import tqdm
 from utils import download_file
 
-# else:
-#     print("Failed to retrieve the page")
 url = "https://updates.jenkins.io/download/plugins/"
 def get_plugins_list():
     print('Retrieving plugins list:')
@@ -21,20 +19,23 @@ def get_plugins_list():
 def get_latest_plugins_links(initial_links):
     print('retrieving all latest plugin links(shortened for now)')
     latest_links = []
-    for index, plugin_url in enumerate(tqdm(initial_links[:20], desc="Processing")):
-        # tqdm.write(f"Downloading: {plugin_url}")
-        response = requests.get(plugin_url)
-        new_soup = BeautifulSoup(response.text, "html.parser")
-        current_links = [a['href'] for a in new_soup.find_all('a', href=True)]
-        latest_links.append(os.path.join(plugin_url, current_links[0][1:]))
+    with tqdm(initial_links[:20], desc="Processing") as pbar:
+        for plugin_url in pbar:
+            response = requests.get(plugin_url)
+            new_soup = BeautifulSoup(response.text, "html.parser")
+            current_links = [a['href'] for a in new_soup.find_all('a', href=True)]
+            latest_links.append(os.path.join(plugin_url, current_links[0][1:]))
+            pbar.set_postfix({"Current": plugin_url})
     for link in latest_links:
         print(link)
 
     return latest_links
 
 def download_plugins(download_links):
-    for plugin_link in download_links:
-        download_file(plugin_link, 'plugins/latest')
+    with tqdm(download_links[:20], desc="Processing") as pbar:
+        for plugin_link in pbar:
+            pbar.set_postfix({"Current": os.path.basename(plugin_link)})
+            download_file(plugin_link, 'plugins/latest')
 
 
 links = get_plugins_list()

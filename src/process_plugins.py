@@ -3,7 +3,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import requests
 from bs4 import BeautifulSoup
 import os
-from env import *
+from config import *
 
 
 def get_plugins_list():
@@ -36,6 +36,4 @@ def get_latest_plugins_links(initial_links):
                 pbar.set_postfix({"Current": latest_link})
                 pbar.update(1)  # Update progress bar as tasks complete
 
-    # for link in latest_links:
-    #     print(link)
     return latest_links

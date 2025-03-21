@@ -2,7 +2,7 @@ import os
 import requests
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from tqdm import tqdm
-from env import max_workers
+from config import max_workers
 
 def download_plugins(download_links):
     print('Downloading plugins:')

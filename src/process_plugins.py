@@ -5,6 +5,42 @@ from bs4 import BeautifulSoup
 import os
 from config import *
 
+def get_plugin_info(plugin_name, version='all'):
+    response = requests.get(f'{url}{plugin_name}/')
+    soup = BeautifulSoup(response.text, "html.parser")
+
+    plugin = []
+    if version == 'all':
+        for a in soup.find_all("a", class_="version"):
+            if a.text == 'permalink to the latest':
+                plugin.append({
+                    'name': plugin_name,
+                    'version': 'latest',
+                    'link': os.path.join(url, plugin_name, a["href"][1:])
+                })
+            else:
+                plugin.append({
+                    'name': plugin_name,
+                    'version': a.text,
+                    'link': a['href']
+                })
+    else: 
+        a = soup.find_all("a", class_="version", string=version)
+        plugin = [{
+            "name": plugin_name,
+            'version': version,
+            'link': a[0]['href']
+        }]
+    return plugin
+
+
+def get_plugins_names():
+    print('Retrieving plugins list:')
+    response = requests.get(url)
+    if response.status_code == 200:
+        soup = BeautifulSoup(response.text, "html.parser")
+        names = [a.text for a in soup.find_all('a', href=True)[4:]]
+        return names
 
 def get_plugins_list():
     print('Retrieving plugins list:')
